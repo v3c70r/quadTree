@@ -25,7 +25,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action,
 }
 
 std::vector<Object> points;
-Quad q(0, Rectangle{glm::vec2(-0.9), glm::vec2(0.9)});
+Quad<5, 10> q(0, Rectangle{glm::vec2(-0.9), glm::vec2(0.9)});
 
 static bool isDragging = false;
 static bool insertPos = false;

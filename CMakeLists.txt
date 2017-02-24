@@ -5,15 +5,24 @@ set(CMAKE_CXX_FLAGS "-std=c++14 -g")
 find_package(GLEW REQUIRED)
 find_package(GLFW REQUIRED)
 find_package(OpenGL REQUIRED)
+option(ENABLE_TEST off)
 
 if (LINUX)
     find_package(X11 REQUIRED)
     include_directories(X11_INCLUDE_DIR)
 endif()
 
-include_directories ( ${GLEW_INCLUDE_DIR}
+include_directories (
+    ${GLEW_INCLUDE_DIR}
     ${GLFW_INCLUDE_DIR}
     ${OpenGL_INCLUDE_DIR})
+include_directories (${CMAKE_SOURCE_DIR}/src)
+
+if(${ENABLE_TEST})
+    enable_testing()
+    add_subdirectory(${CMAKE_SOURCE_DIR}/test)
+endif()
+
 file(GLOB SRC "src/*.cpp")
 add_executable(mainWin 
     ${SRC})

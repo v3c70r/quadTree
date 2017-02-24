@@ -1,15 +1,13 @@
 #pragma once
-#include "quad.hpp"
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
-class Quad;
 class Object
 {
 private:
     glm::vec2 location_;    //!< the location of the object
-    Quad* q_;               //!< the quad the object belong to
 public:
-    Object(glm::vec2 loc):location_(loc){};
+    Object():location_(glm::vec2(0.0)){}
+    Object(glm::vec2 loc):location_(loc){}
 
     //virtual void update(float tick) = 0;
 
@@ -21,11 +19,8 @@ public:
     {
         return location_;
     }
-    void setQuad(Quad* q)
-    {
-        q_ = q;
-    }
 
+    // Draw function
     void glDraw() const
     {
         glBegin(GL_POINTS);
