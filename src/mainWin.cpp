@@ -12,6 +12,9 @@
 #include "quad.hpp"
 #include "object.hpp"
 
+#include <AABB.hpp>
+#include <AABBQuadTree.hpp>
+
 // //////////////////////
 static void error_callback(int error, const char* description)
 {
@@ -26,6 +29,9 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action,
 
 std::vector<Object> points;
 Quad<5, 10> q(0, Rectangle{glm::vec2(-0.9), glm::vec2(0.9)});
+
+std::vector<QT::AABB> aabbPoints;
+QT::AABBQuad<5, 2> aabbQ(0, Rectangle{glm::vec2(-0.9), glm::vec2(0.9)});
 
 static bool isDragging = false;
 static bool insertPos = false;
@@ -78,7 +84,7 @@ int main(void)
     GLFWwindow* window;
     std::random_device rd;
     std::mt19937 mt(rd());
-    std::uniform_real_distribution<float> dist(-0.9, 0.9);
+    std::normal_distribution<float> dist(0.0, 0.2);
     for (size_t i=0; i<1000; i++)
     {
         points.push_back(Object{glm::vec2(dist(mt), dist(mt))});
@@ -96,8 +102,15 @@ int main(void)
     glfwSetMouseButtonCallback(window, mouse_button_callback);
     glfwSetCursorPosCallback(window, cursor_position_callback);
 
+    //aabbPoints.push_back(QT::AABB(Rectangle{glm::vec2(-0.2), glm::vec2(0.3)}));
+    //aabbPoints.push_back(QT::AABB(Rectangle{glm::vec2(-0.2), glm::vec2(0.3)}));
+    //aabbPoints.push_back(QT::AABB(Rectangle{glm::vec2(-0.1), glm::vec2(0.3)}));
+    for (size_t i=0; i<aabbPoints.size(); i++)
+        aabbQ.insertObj(&(aabbPoints[i]));
 
-    while (!glfwWindowShouldClose(window)) {
+
+    while (!glfwWindowShouldClose(window))
+    {
         float ratio;
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
@@ -113,6 +126,12 @@ int main(void)
         for (const auto& pt : points) {
             pt.glDraw();
         }
+        glColor3f(1.0, 0.0, 0.0);
+        for (const auto& aabb: aabbPoints)
+        {
+            aabb.getBoundingBox().glDraw();
+        }
+        glColor3f(0.0, 1.0, 0.0);
         q.draw();
         glfwSwapBuffers(window);
         glfwPollEvents();

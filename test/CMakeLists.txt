@@ -25,9 +25,9 @@ file(GLOB SRC
     ${CMAKE_SOURCE_DIR}/src/object.cpp
     ${CMAKE_SOURCE_DIR}/src/rectangle.cpp
     )
-add_executable(runTest RunTest.cpp ${SRC})
+add_executable(runTest RunTest.cpp)
 add_dependencies(runTest gtest)
-target_link_libraries(runTest ${GTEST_LIBRARIES} Threads::Threads)
+target_link_libraries(runTest quadTree ${GTEST_LIBRARIES} Threads::Threads)
 
 # Use test 
 if (COVERAGE)

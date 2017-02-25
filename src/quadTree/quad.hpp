@@ -10,7 +10,6 @@ class Quad
 private:
     const static size_t INVALID_QUAD = 4;
     Rectangle bound_;
-    size_t numPoints_;
     size_t depth_;
     std::array<Quad<MAX_DEPTH, MAX_OBJS>*, 4> quads_;
     std::vector<Object*> objs_;
