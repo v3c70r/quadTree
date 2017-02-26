@@ -35,7 +35,7 @@ std::vector<Object> points;
 Quad<5, 10> q(0, Rectangle{glm::vec2(-0.9), glm::vec2(0.9)});
 
 std::vector<QT::AABB> aabbPoints;
-QT::AABBQuad<5, 2> aabbQ(0, Rectangle{glm::vec2(-0.9), glm::vec2(0.9)});
+QT::AABBQuad<6, 100> aabbQ(0, Rectangle{glm::vec2(-0.9), glm::vec2(0.9)});
 
 static bool isDragging = false;
 static bool insertPos = false;
@@ -88,18 +88,21 @@ int main(void)
     GLFWwindow* window;
     std::random_device rd;
     std::mt19937 mt(rd());
-    std::normal_distribution<float> dist(0.0, 0.2);
+    std::normal_distribution<float> xdist(0.0, 0.2);
+    std::normal_distribution<float> ydist(0.0, 0.3);
+    std::uniform_real_distribution<float> xsize( 0.0, 0.5);
+    std::uniform_real_distribution<float> ysize( 0.0, 0.5);
     for (size_t i=0; i<1000; i++)
     {
-        points.push_back(Object{glm::vec2(dist(mt), dist(mt))});
+        points.push_back(Object{glm::vec2(xdist(mt), ydist(mt))});
         q.insertObj(&(points.back()));
     }
 
     glfwSetErrorCallback(error_callback);
     if (!glfwInit()) exit(EXIT_FAILURE);
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #if __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -116,16 +119,26 @@ int main(void)
     glfwSetCursorPosCallback(window, cursor_position_callback);
 
 
-    glewInit();
+    // Init glew, enable it to avoid ImGui crash on Linux
+    glewExperimental = GL_TRUE;
+    GLenum err = glewInit();
+    if (err != GLEW_OK)
+        throw std::runtime_error("Unable to init glew");
+
     // Setup ImGui binding
-    ImGui_ImplGlfwGL3_Init(window, true);
+    if (!ImGui_ImplGlfwGL3_Init(window, true))
+        throw std::runtime_error("Unable to init ImGui");
+
     ImGuiIO& io = ImGui::GetIO();
     io.Fonts->AddFontDefault();
-    
 
-    //aabbPoints.push_back(QT::AABB(Rectangle{glm::vec2(-0.2), glm::vec2(0.3)}));
-    //aabbPoints.push_back(QT::AABB(Rectangle{glm::vec2(-0.2), glm::vec2(0.3)}));
-    //aabbPoints.push_back(QT::AABB(Rectangle{glm::vec2(-0.1), glm::vec2(0.3)}));
+    // Generate aabb points
+    for (size_t i=0; i<1000; i++)
+    {
+        glm::vec2 startP{xdist(mt), ydist(mt)};
+        glm::vec2 sz{xsize(mt), ysize(mt)};
+        aabbPoints.push_back(Rectangle{startP, startP+sz});
+    }
     for (size_t i=0; i<aabbPoints.size(); i++)
         aabbQ.insertObj(&(aabbPoints[i]));
 
@@ -140,14 +153,14 @@ int main(void)
         // ///////
         float sz = 50.0;
         //draw_list->AddRect(ImVec2(p.x, p.y), ImVec2(p.x+sz, p.y+sz), ImColor(ImVec4(1.0, 0.0, 0.0, 1.0)), 1.0f, ~1, 1.0);
-        Rectangle r1{glm::vec2(10.0, 10.0),
-                    glm::vec2(50.0, 30.0)};
-        Rectangle r2{glm::vec2(0.0, 0.0),
-                    glm::vec2(50.0, 30.0)};
-        ImGui::Begin("Rectangles");
-        r1.ImDraw(1);
-        r2.ImDraw(1);
-        ImGui::End();
+        //Rectangle b{glm::vec2(0.0), glm::vec2(60)};
+        //Rectangle r1{glm::vec2(10.0, 10.0), glm::vec2(30.0, 20.0)};
+        //Rectangle r2{glm::vec2(0.0, 0.0), glm::vec2(50.0, 30.0)};
+
+        //ImGui::Begin("Rectangles");
+        //r1.ImDraw(2, b);
+        //r2.ImDraw(2, b);
+        //ImGui::End();
 
         float ratio;
         int width, height;
@@ -161,16 +174,22 @@ int main(void)
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
         glPointSize(5.0);
+
         for (const auto& pt : points) {
             pt.glDraw();
         }
         glColor3f(1.0, 0.0, 0.0);
+
+        static float scale = 100.0;
+        ImGui::Begin("QuadTree");
+        ImGui::SliderFloat("Scale", &scale, 0.1, 1000.0, "%.0f");
         for (const auto& aabb: aabbPoints)
         {
-            aabb.getBoundingBox().glDraw();
+            aabb.getBoundingBox().ImDraw(scale, q.getBound(), ImVec4(1.0, 0.0, 0.0, 1.0));
         }
+        aabbQ.ImDraw(scale, q.getBound());
+        ImGui::End();
         glColor3f(0.0, 1.0, 0.0);
-        q.draw();
         ImGui::Render();
         glfwSwapBuffers(window);
     }

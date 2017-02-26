@@ -65,11 +65,12 @@ public:
             isLeaf = false;
         }
     }
-    void draw() const
+    // Draw Quadtree with ImGui
+    void ImDraw(float scale, const Rectangle &boundary) const
     {
-        bound_.glDraw();
+        bound_.ImDraw(scale, boundary);
         for (const auto &q : quads_)
-            if (q) q->draw();
+            if (q) q->ImDraw(scale, boundary);
     }
 };
 }

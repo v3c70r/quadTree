@@ -84,10 +84,4 @@ public:
         }
     }
 
-    void draw() const
-    {
-        bound_.glDraw();
-        for (const auto &q : quads_)
-            if (q) q->draw();
-    }
 };

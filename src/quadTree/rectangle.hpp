@@ -15,34 +15,35 @@ struct Rectangle
         return p.x > bounds[0].x && p.x < bounds[1].x && p.y > bounds[0].y &&
                p.y < bounds[1].y;
     }
-    void glDraw() const
-    {
-        glBegin(GL_LINE_LOOP);
-            glVertex3f(bounds[0].x, bounds[0].y, 0.0f);
-            glVertex3f(bounds[1].x, bounds[0].y, 0.0f);
-            glVertex3f(bounds[1].x, bounds[1].y, 0.0f);
-            glVertex3f(bounds[0].x, bounds[1].y, 0.0f);
-        glEnd();
-    }
 
     /*! Draw rectangle with ImGui API
      *
      * \param scale 
-     * \param translation Translation of the rectangle.
+     * \param The bounding box for the box to draw within.
      */
-    void ImDraw(float scale=1, glm::vec2 translation = glm::vec2(0.0)) const
+    void ImDraw(float scale, const Rectangle &boudingBox,
+                ImColor color = ImVec4(1.0, 1.0, 1.0, 1.0),
+                bool filled = false) const
     {
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
         const ImVec2 p = ImGui::GetCursorScreenPos();
-        draw_list->AddRect(
-            ImVec2{
-            translation,
-            }
-            ImVec2{
-                translation.x + (bounds[1].x - bounds[0].x)*scale,
-                translation.y + (bounds[1].y - bounds[0].y)*scale,
-                },
-            ImColor(ImVec4(1.0, 0.0, 0.0, 1.0)), 1.0f, ~1, 1.0);
+        float xOffset = (bounds[0].x - boudingBox.bounds[0].x) * scale;
+        float yOffset = (boudingBox.bounds[1].y - bounds[1].y) * scale;
+        ImVec2 startPoint{p.x + xOffset, p.y + yOffset};
+
+        if (filled)
+            draw_list->AddRectFilled(
+                startPoint,
+                ImVec2{startPoint.x + (bounds[1].x - bounds[0].x) * scale,
+                       startPoint.y + (bounds[1].y - bounds[0].y) * scale},
+                color);
+
+        else
+            draw_list->AddRect(
+                startPoint,
+                ImVec2{startPoint.x + (bounds[1].x - bounds[0].x) * scale,
+                       startPoint.y + (bounds[1].y - bounds[0].y) * scale},
+                color, 1.0f, ~1, 1.0);
     }
 };
 // Split a rectangle into four. NW, NE, SW, SE
