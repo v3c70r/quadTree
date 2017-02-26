@@ -5,6 +5,7 @@ set(CMAKE_CXX_FLAGS "-std=c++14 -g")
 find_package(GLEW REQUIRED)
 find_package(GLFW REQUIRED)
 find_package(OpenGL REQUIRED)
+
 option(ENABLE_TEST off)
 
 if (LINUX)
@@ -17,6 +18,7 @@ include_directories (
     ${GLFW_INCLUDE_DIR}
     ${OpenGL_INCLUDE_DIR})
 include_directories (${CMAKE_SOURCE_DIR}/src/quadTree)
+include_directories (${CMAKE_SOURCE_DIR}/src/thirdParty/imgui)
 
 if(${ENABLE_TEST})
     enable_testing()
@@ -25,7 +27,12 @@ endif()
 
 add_library(quadTree 
     ./src/quadTree/rectangle.cpp
-    ./src/quadTree/quad.cpp
+    )
+add_library(imgui
+    ./src/thirdParty/imgui/imgui.cpp
+    ./src/thirdParty/imgui/imgui_draw.cpp
+    ./src/thirdParty/imgui/examples/opengl3_example/imgui_impl_glfw_gl3.cpp
+    ./src/thirdParty/imgui/examples/opengl3_example/imgui_impl_glfw_gl3.cpp
     )
 file(GLOB SRC "./src/mainWin.cpp")
 add_executable(mainWin 
@@ -33,6 +40,7 @@ add_executable(mainWin
 target_link_libraries(
     mainWin
     quadTree
+    imgui
     ${GLEW_LIBRARIES}
     ${GLFW_LIBRARIES}
     ${OPENGL_LIBRARIES}

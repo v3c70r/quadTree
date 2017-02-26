@@ -1,3 +1,4 @@
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,9 +9,12 @@
 #include <array>
 #include <random>
 
-#include "rectangle.hpp"
-#include "quad.hpp"
-#include "object.hpp"
+#include <rectangle.hpp>
+#include <quad.hpp>
+#include <object.hpp>
+
+#include <imgui.h>
+#include <examples/opengl3_example/imgui_impl_glfw_gl3.h>
 
 #include <AABB.hpp>
 #include <AABBQuadTree.hpp>
@@ -90,8 +94,17 @@ int main(void)
         points.push_back(Object{glm::vec2(dist(mt), dist(mt))});
         q.insertObj(&(points.back()));
     }
+
     glfwSetErrorCallback(error_callback);
     if (!glfwInit()) exit(EXIT_FAILURE);
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#if __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
     window = glfwCreateWindow(640, 480, "Simple example", NULL, NULL);
     if (!window) {
         glfwTerminate();
@@ -102,6 +115,14 @@ int main(void)
     glfwSetMouseButtonCallback(window, mouse_button_callback);
     glfwSetCursorPosCallback(window, cursor_position_callback);
 
+
+    glewInit();
+    // Setup ImGui binding
+    ImGui_ImplGlfwGL3_Init(window, true);
+    ImGuiIO& io = ImGui::GetIO();
+    io.Fonts->AddFontDefault();
+    
+
     //aabbPoints.push_back(QT::AABB(Rectangle{glm::vec2(-0.2), glm::vec2(0.3)}));
     //aabbPoints.push_back(QT::AABB(Rectangle{glm::vec2(-0.2), glm::vec2(0.3)}));
     //aabbPoints.push_back(QT::AABB(Rectangle{glm::vec2(-0.1), glm::vec2(0.3)}));
@@ -111,6 +132,23 @@ int main(void)
 
     while (!glfwWindowShouldClose(window))
     {
+        glfwPollEvents();
+        ImGui_ImplGlfwGL3_NewFrame();
+        ImGui::Text("Hello, world!");
+
+        // Experiment on draw rectangles!!
+        // ///////
+        float sz = 50.0;
+        //draw_list->AddRect(ImVec2(p.x, p.y), ImVec2(p.x+sz, p.y+sz), ImColor(ImVec4(1.0, 0.0, 0.0, 1.0)), 1.0f, ~1, 1.0);
+        Rectangle r1{glm::vec2(10.0, 10.0),
+                    glm::vec2(50.0, 30.0)};
+        Rectangle r2{glm::vec2(0.0, 0.0),
+                    glm::vec2(50.0, 30.0)};
+        ImGui::Begin("Rectangles");
+        r1.ImDraw(1);
+        r2.ImDraw(1);
+        ImGui::End();
+
         float ratio;
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
@@ -133,9 +171,10 @@ int main(void)
         }
         glColor3f(0.0, 1.0, 0.0);
         q.draw();
+        ImGui::Render();
         glfwSwapBuffers(window);
-        glfwPollEvents();
     }
+    ImGui_ImplGlfwGL3_Shutdown();
     glfwDestroyWindow(window);
     glfwTerminate();
     exit(EXIT_SUCCESS);
