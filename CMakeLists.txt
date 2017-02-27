@@ -18,6 +18,7 @@ include_directories (
     ${GLFW_INCLUDE_DIR}
     ${OpenGL_INCLUDE_DIR})
 include_directories (${CMAKE_SOURCE_DIR}/src/quadTree)
+include_directories (${CMAKE_SOURCE_DIR}/src/world)
 include_directories (${CMAKE_SOURCE_DIR}/src/thirdParty/imgui)
 
 if(${ENABLE_TEST})
