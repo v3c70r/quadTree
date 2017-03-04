@@ -7,6 +7,7 @@ int main()
     GAME::World world
         (100, 100, Rectangle{glm::vec2(-1.0), glm::vec2(1.0)});
     GAME::OpenGLRenderer renderer(world);
+    renderer.init();
 }
 /*
 #include <GL/glew.h>

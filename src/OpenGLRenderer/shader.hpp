@@ -26,7 +26,9 @@ private:
     bool createProgramme_(GLuint vert, GLuint frag, GLuint* programme);
 
 public:
-    Shader() : programme_(0) { ; }
+    Shader() : programme_(0) {  }
+    void getUniforms();
+    void getAttributes();
     bool createProgrammeFromFiles(const char* kernel_file_name);
     bool createProgrammeFromFiles(const char* vert_file_name,
                                   const char* geometry_file_name,

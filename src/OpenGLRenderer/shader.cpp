@@ -180,12 +180,53 @@ bool Shader::createProgrammeFromFiles(const char* vert_file_name,
 bool Shader::createProgrammeFromFiles(const char* vert_file_name,
                                       const char* frag_file_name)
 {
+    GLuint dummyVAO;
+    glGenVertexArrays(1, &dummyVAO);
+    glBindVertexArray(dummyVAO);
     GLuint vertShader;
     GLuint fragShader;
     assert(createShader_(vert_file_name, &vertShader, GL_VERTEX_SHADER));
     assert(createShader_(frag_file_name, &fragShader, GL_FRAGMENT_SHADER));
     assert(createProgramme_(vertShader, fragShader, &programme_));
+    glBindVertexArray(0);
+    glDeleteVertexArrays(1, &dummyVAO);
     return true;
+}
+
+void Shader::getAttributes()
+{
+    GLint count;
+    glGetProgramiv(programme_, GL_ACTIVE_UNIFORMS, &count);
+    printf("Active Attributes: %d\n", count);
+    char buffer[100];
+    GLint length;
+    GLenum type;
+    GLint size = 100;
+
+    for (GLint i = 0; i < count; i++) {
+        glGetActiveAttrib(programme_, (GLuint)i, 100, &length, &size, &type,
+                           buffer);
+        GLint loc = glGetAttribLocation(programme_, buffer);
+
+        printf("getAttributes #%d Type: %u Name: %s\n", loc, type, buffer);
+    }
+}
+void Shader::getUniforms()
+{
+    GLint count;
+    glGetProgramiv(programme_, GL_ACTIVE_UNIFORMS, &count);
+    printf("Active Uniforms: %d\n", count);
+    char buffer[100];
+    GLint length;
+    GLenum type;
+    GLint size = 100;
+
+    for (GLint i = 0; i < count; i++) {
+        glGetActiveUniform(programme_, (GLuint)i, 100, &length, &size, &type,
+                           buffer);
+
+        printf("Uniform #%d Type: %u Name: %s\n", i, type, buffer);
+    }
 }
 
 bool Shader::use() const
@@ -193,4 +234,3 @@ bool Shader::use() const
     glUseProgram(programme_);
     return true;
 }
-

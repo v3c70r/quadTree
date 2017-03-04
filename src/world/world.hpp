@@ -5,6 +5,8 @@
 #include <quadTree/AABBQuadTree.hpp>
 #include <chrono>
 #include <quadTree/rectangle.hpp>
+#include <world/camera.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 namespace GAME
 {
 /*! Game world!
@@ -19,6 +21,7 @@ protected:
     std::vector<Object> staticObjs_;    //!< Static objects
     std::vector<Actor> actors_;         //!< Dynamic objects
     QT::AABBQuad<10, 100> quadTree_;
+    Camera camera_;
 
 public:
     World(size_t maxStatic, size_t maxDynamic, Rectangle worldBound):
@@ -28,6 +31,9 @@ public:
     {
         staticObjs_.reserve(MAX_NUM_STATIC_OBJS);
         actors_.reserve(MAX_NUM_DYNAMIC_OBJS);
+
+        camera_.cameraMatrix() = glm::lookAt(glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+        camera_.projectionMatrix() = glm::perspective(100.0f, 1.0f, 0.1f, 100.0f);
     }
     void addStaticObj(Object obj) {staticObjs_.push_back(obj);}
     const std::vector<Object>& getStaticObjs() const { return staticObjs_;}

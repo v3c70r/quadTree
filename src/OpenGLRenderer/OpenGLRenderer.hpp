@@ -16,6 +16,7 @@ private:
     const World& world_;
     Shader basicShader_;
     GLFWwindow *window;
+    Shader shader_;
 
     void constructStaticVBO_(); //!< Construct VBO for static objects
     void initGL_();             //!< Init OpenGL context
@@ -30,12 +31,18 @@ public:
     {
         initGL_();
         constructStaticVBO_();
+        shader_.createProgrammeFromFiles("shader.vs", "shader.fs");
+        shader_.getUniforms();
+        shader_.getAttributes();
     }
     void glDraw()
     {
     }
     ~OpenGLRenderer()
     {
+        glDeleteBuffers(1, &staticObjVBO);
+        glDeleteBuffers(1, &staticObjIndexVBO);
+        glDeleteVertexArrays(1, &staticObjVAO);
         if (window) {
             glfwDestroyWindow(window);
             glfwTerminate();

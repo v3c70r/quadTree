@@ -51,4 +51,6 @@ target_link_libraries(
     ${OPENGL_LIBRARIES}
     ${X11_LIBRARIES}
     ${CMAKE_DL_LIBS}
+    OpenGLRenderer
+    common
     )

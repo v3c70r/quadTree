@@ -16,6 +16,8 @@ void OpenGLRenderer::initGL_()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
     window = glfwCreateWindow(640, 480, "Simple example", nullptr, nullptr);
+    glfwMakeContextCurrent(window);
+
     glewExperimental = GL_TRUE;
     GLenum err = glewInit();
     if (err != GLEW_OK)
