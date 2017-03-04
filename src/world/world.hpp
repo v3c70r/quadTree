@@ -1,10 +1,10 @@
 #pragma once
 #include <vector>
-#include <object.hpp>
-#include <actor.hpp>
-#include <AABBQuadTree.hpp>
+#include "object.hpp"
+#include "actor.hpp"
+#include <quadTree/AABBQuadTree.hpp>
 #include <chrono>
-#include <rectangle.hpp>
+#include <quadTree/rectangle.hpp>
 namespace GAME
 {
 /*! Game world!

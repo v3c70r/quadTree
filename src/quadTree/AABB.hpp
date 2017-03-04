@@ -1,5 +1,5 @@
 #pragma once
-#include <rectangle.hpp>
+#include "rectangle.hpp"
 namespace QT {
 
 //! Axis Alinged Bounding Box

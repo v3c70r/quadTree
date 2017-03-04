@@ -1,3 +1,14 @@
+#include <OpenGLRenderer/OpenGLRenderer.hpp>
+#include <world/world.hpp>
+#include <quadTree/rectangle.hpp>
+#include <glm/glm.hpp>
+int main()
+{
+    GAME::World world
+        (100, 100, Rectangle{glm::vec2(-1.0), glm::vec2(1.0)});
+    GAME::OpenGLRenderer renderer(world);
+}
+/*
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <stdio.h>
@@ -10,7 +21,6 @@
 #include <random>
 
 #include <rectangle.hpp>
-#include <quad.hpp>
 #include <object.hpp>
 
 #include <imgui.h>
@@ -198,3 +208,4 @@ int main(void)
     glfwTerminate();
     exit(EXIT_SUCCESS);
 }
+*/
