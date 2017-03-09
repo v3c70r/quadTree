@@ -196,7 +196,7 @@ bool Shader::createProgrammeFromFiles(const char* vert_file_name,
 void Shader::getAttributes()
 {
     GLint count;
-    glGetProgramiv(programme_, GL_ACTIVE_UNIFORMS, &count);
+    glGetProgramiv(programme_, GL_ACTIVE_ATTRIBUTES, &count);
     printf("Active Attributes: %d\n", count);
     char buffer[100];
     GLint length;
@@ -218,14 +218,14 @@ void Shader::getUniforms()
     printf("Active Uniforms: %d\n", count);
     char buffer[100];
     GLint length;
-    GLenum type;
     GLint size = 100;
 
     for (GLint i = 0; i < count; i++) {
-        glGetActiveUniform(programme_, (GLuint)i, 100, &length, &size, &type,
+        Uniform uniform;
+        glGetActiveUniform(programme_, (GLuint)i, 100, &length, &size, &(uniform.type),
                            buffer);
-
-        printf("Uniform #%d Type: %u Name: %s\n", i, type, buffer);
+        uniform.location = glGetUniformLocation(programme_, buffer);
+        printf("Uniform loc: %d Type: %u Name: %s\n", uniform.location, uniform.type, buffer);
     }
 }
 

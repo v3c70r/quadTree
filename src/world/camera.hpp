@@ -2,7 +2,7 @@
 #include "object.hpp"
 namespace GAME
 {
-class Camera : public Object {
+class Camera {
 protected:
     glm::mat4 cameraMatrix_;
     glm::mat4 projectionMatrix_;

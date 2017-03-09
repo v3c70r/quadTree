@@ -5,6 +5,9 @@ set(CMAKE_CXX_FLAGS "-std=c++14 -g")
 find_package(GLEW REQUIRED)
 find_package(GLFW REQUIRED)
 find_package(OpenGL REQUIRED)
+set(TINYOBJ_INCLUDE_DIR "/home/tsing/project/common/include")
+set(TINYOBJ_LIB "/home/tsing/project/common/lib/libtinyobjloader.a")
+include_directories(${TINYOBJ_INCLUDE_DIR})
 
 option(ENABLE_TEST off)
 
@@ -53,4 +56,11 @@ target_link_libraries(
     ${CMAKE_DL_LIBS}
     OpenGLRenderer
     common
+    ${TINYOBJ_LIB}
+    )
+file(
+    COPY
+    ${CMAKE_SOURCE_DIR}/assets/shaders
+    DESTINATION
+    ${CMAKE_BINARY_DIR}
     )

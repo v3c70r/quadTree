@@ -1,31 +1,183 @@
+#include <GL/glew.h>
 #include <OpenGLRenderer/OpenGLRenderer.hpp>
 #include <world/world.hpp>
 #include <quadTree/rectangle.hpp>
 #include <glm/glm.hpp>
+#include <iostream>
+#include <fstream>
+using namespace std;
+class splitstring : public string {
+    vector<string> flds;
+    vector<float> floatArray;
+public:
+    splitstring(char *s) : string(s) { };
+    splitstring(string s) : string(s) { };
+    vector<string>& split(char delim, int rep=0)
+    {
+           if (!flds.empty()) flds.clear();  // empty vector if necessary
+    string work = data();
+    string buf = "";
+    unsigned i = 0;
+    while (i < work.length()) {
+        if (work[i] != delim)
+            buf += work[i];
+        else if (rep == 1) {
+            flds.push_back(buf);
+            buf = "";
+        } else if (buf.length() > 0) {
+            flds.push_back(buf);
+            buf = "";
+        }
+        i++;
+    }
+    if (!buf.empty())
+        flds.push_back(buf);
+return flds;
+    }
+};
+
+void loadSimpleOBJ(std::string objFile, std::vector<float> &buf, std::vector<unsigned> &index)
+{
+    std::vector<GLfloat> vertices;
+    std::vector<GLfloat> normals;
+    std::vector<GLuint> indices;
+    GLuint nV = 0;
+    GLuint nF = 0;
+    std::ifstream inFile(objFile);
+    std::string str;
+    std::cout << "Loading " << objFile << "..." << std::endl;
+    while (std::getline(inFile, str))  // read  position
+    {
+        splitstring split(str);
+        std::vector<std::string> splited = split.split(' ');
+        if (splited.size() > 0) {
+            if (splited[0] == "v") {
+                nV++;
+                for (size_t i=1; i<splited.size(); i++)
+                {
+                    vertices.push_back(std::stof(splited[i]));
+                }
+            }
+            else if (splited[0] == "f") {
+                if (splited.size() == 4)  // triangle
+                {
+                    nF++;
+                    for (size_t i=1; i<splited.size(); i++)
+                        indices.push_back((GLuint)std::stoi(splited[i]) - 1);
+                }
+                else if (splited.size() == 5)  // quad faces
+                {
+                    nF += 2;
+                    indices.push_back((GLuint)std::stoi(splited[1]) - 1);
+                    indices.push_back((GLuint)std::stoi(splited[2]) - 1);
+                    indices.push_back((GLuint)std::stoi(splited[4]) - 1);
+                    indices.push_back((GLuint)std::stoi(splited[4]) - 1);
+                    indices.push_back((GLuint)std::stoi(splited[2]) - 1);
+                    indices.push_back((GLuint)std::stoi(splited[3]) - 1);
+                }
+            }
+            else
+                continue;
+        }
+    }
+    if (normals.size() == 0)  // Calculate normal from mesh
+    {
+        // Smooth normals
+        normals.resize(vertices.size(), 0.0);
+        for (auto i = 0; i < indices.size(); i += 3) {
+            glm::vec3 p0 = {vertices[3 * indices[i]],
+                            vertices[3 * indices[i] + 1],
+                            vertices[3 * indices[i] + 2]};
+            glm::vec3 p1 = {vertices[3 * (indices[i + 1])],
+                            vertices[3 * (indices[i + 1]) + 1],
+                            vertices[3 * (indices[i + 1]) + 2]};
+            glm::vec3 p2 = {vertices[3 * (indices[i + 2])],
+                            vertices[3 * (indices[i + 2]) + 1],
+                            vertices[3 * (indices[i + 2]) + 2]};
+            glm::vec3 normal = glm::normalize(glm::cross((p1 - p0), (p2 - p0)));
+            normals[3 * indices[i]] += normal.x;
+            normals[3 * indices[i] + 1] += normal.y;
+            normals[3 * indices[i] + 2] += normal.z;
+            normals[3 * (indices[i + 1])] += normal.x;
+            normals[3 * (indices[i + 1]) + 1] += normal.y;
+            normals[3 * (indices[i + 1]) + 2] += normal.z;
+            normals[3 * (indices[i + 2])] += normal.x;
+            normals[3 * (indices[i + 2]) + 1] += normal.y;
+            normals[3 * (indices[i + 2]) + 2] += normal.z;
+        }
+        // normalize
+        for (auto i = 0; i < normals.size(); i += 3) {
+            float distance = glm::sqrt(normals[i] * normals[i] +
+                                       normals[i + 1] * normals[i + 1] +
+                                       normals[i + 2] * normals[i + 2]);
+            normals[i] /= distance;
+            normals[i + 1] /= distance;
+            normals[i + 2] /= distance;
+        }
+    }
+
+    for (size_t i=0; i<vertices.size(); i+=3)
+    {
+        buf.push_back(vertices[i]);
+        buf.push_back(vertices[i+1]);
+        buf.push_back(vertices[i+2]);
+        buf.push_back(normals[i]);
+        buf.push_back(normals[i+1]);
+        buf.push_back(normals[i+2]);
+    }
+    for (size_t i=0; i<indices.size(); i++)
+        index.push_back(indices[i]);
+}
+
 int main()
 {
-    GAME::World world
-        (100, 100, Rectangle{glm::vec2(-1.0), glm::vec2(1.0)});
+    LOG::restartLog();
+    GAME::World world(100, 100, Rectangle{glm::vec2(-1.0), glm::vec2(1.0)});
+    GAME::Object obj1;
+    GAME::Object obj2;
+
+    // Load Object
+    std::string inputFile = "model/tyra.obj";
+    std::vector<float> buf1;
+    std::vector<unsigned> index1;
+    loadSimpleOBJ(inputFile, buf1, index1);
+
+    obj1.data() = buf1;
+    obj1.index() = index1;
+    obj1.modelMatrix() = glm::rotate(obj1.modelMatrix(), 3.1415926f, glm::vec3(0.0, 1.0, 0.0));
+    world.addStaticObj(obj1);
+
+    inputFile = "model/bunny.obj";
+    std::vector<float> buf2;
+    std::vector<unsigned> index2;
+    loadSimpleOBJ(inputFile, buf2, index2);
+    obj2.data() = buf2;
+    obj2.index() = index2;
+    obj2.modelMatrix() = glm::translate(obj2.modelMatrix(), glm::vec3(-2.0, 0.0, 0.0));
+    obj2.modelMatrix() = glm::scale(obj2.modelMatrix(), glm::vec3(10.0));
+    world.addStaticObj(obj2);
+
     GAME::OpenGLRenderer renderer(world);
     renderer.init();
+    renderer.runLoop();
 }
 /*
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <array>
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
-#include <vector>
 #include <iostream>
-#include <array>
 #include <random>
+#include <vector>
 
-#include <rectangle.hpp>
 #include <object.hpp>
+#include <rectangle.hpp>
 
-#include <imgui.h>
 #include <examples/opengl3_example/imgui_impl_glfw_gl3.h>
+#include <imgui.h>
 
 #include <AABB.hpp>
 #include <AABBQuadTree.hpp>
@@ -72,7 +224,8 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action,
 }
 
 
-static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
+static void cursor_position_callback(GLFWwindow* window, double xpos, double
+ypos)
 {
     if (isDragging)
     {
@@ -163,7 +316,8 @@ int main(void)
         // Experiment on draw rectangles!!
         // ///////
         float sz = 50.0;
-        //draw_list->AddRect(ImVec2(p.x, p.y), ImVec2(p.x+sz, p.y+sz), ImColor(ImVec4(1.0, 0.0, 0.0, 1.0)), 1.0f, ~1, 1.0);
+        //draw_list->AddRect(ImVec2(p.x, p.y), ImVec2(p.x+sz, p.y+sz),
+ImColor(ImVec4(1.0, 0.0, 0.0, 1.0)), 1.0f, ~1, 1.0);
         //Rectangle b{glm::vec2(0.0), glm::vec2(60)};
         //Rectangle r1{glm::vec2(10.0, 10.0), glm::vec2(30.0, 20.0)};
         //Rectangle r2{glm::vec2(0.0, 0.0), glm::vec2(50.0, 30.0)};
@@ -196,7 +350,8 @@ int main(void)
         ImGui::SliderFloat("Scale", &scale, 0.1, 1000.0, "%.0f");
         for (const auto& aabb: aabbPoints)
         {
-            aabb.getBoundingBox().ImDraw(scale, q.getBound(), ImVec4(1.0, 0.0, 0.0, 1.0));
+            aabb.getBoundingBox().ImDraw(scale, q.getBound(), ImVec4(1.0, 0.0,
+0.0, 1.0));
         }
         aabbQ.ImDraw(scale, q.getBound());
         ImGui::End();

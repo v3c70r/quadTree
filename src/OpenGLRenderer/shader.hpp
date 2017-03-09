@@ -10,6 +10,23 @@
 
 #define MAX_SHADER_LENGTH (262144)
 
+struct Uniform
+{
+    GLenum type;
+    GLuint location;
+};
+
+struct Attribute
+{
+    GLenum type;
+    GLuint location;
+};
+
+struct UnifromBlock
+{
+    GLuint binding;
+};
+
 //! OpenGL Shader library
 class Shader {
 private:
@@ -26,7 +43,7 @@ private:
     bool createProgramme_(GLuint vert, GLuint frag, GLuint* programme);
 
 public:
-    Shader() : programme_(0) {  }
+    Shader() : programme_(0) {}
     void getUniforms();
     void getAttributes();
     bool createProgrammeFromFiles(const char* kernel_file_name);

@@ -22,6 +22,14 @@ void OpenGLRenderer::initGL_()
     GLenum err = glewInit();
     if (err != GLEW_OK)
         throw std::runtime_error("Unable to init glew");
+    glfwSetKeyCallback(window, key_callback);
+
+    // Store current window address
+    glfwSetWindowUserPointer(window, this);
+
+    // Init joystick
+    int present = glfwJoystickPresent(GLFW_JOYSTICK_1);
+
 }
 void OpenGLRenderer::constructStaticVBO_() {
     // Construct VBO for rendering, in this stage
@@ -56,24 +64,29 @@ void OpenGLRenderer::constructStaticVBO_() {
             index.push_back(idx + indexOffset);
         indexOffset += obj.data().size() / 6;
     }
+    staticObjNumElements_ = index.size();
 
     // Populate data to VBO;
     glGenVertexArrays(1, &staticObjVAO);
     glGenBuffers(1, &staticObjVBO);
-    glGenBuffers(1, &staticObjIndexVBO);
+    glGenBuffers(1, &staticObjIBO);
+
     glBindVertexArray(staticObjVAO);
     glBindBuffer(GL_ARRAY_BUFFER, staticObjVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 7 * buffer.size(),
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * buffer.size(),
                  buffer.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), 0);
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, 7 * sizeof(GLfloat),
                           (void*)(4 * sizeof(GLfloat)));
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, staticObjIndexVBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, staticObjIBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint)*index.size(), index.data(), GL_STATIC_DRAW);
+
+    glBindVertexArray(0);
+
+    // Unbind buffers after unbinding vertex array
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
 }
 }
