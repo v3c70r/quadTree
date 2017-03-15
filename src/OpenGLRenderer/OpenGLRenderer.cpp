@@ -31,6 +31,15 @@ void OpenGLRenderer::initGL_()
     int present = glfwJoystickPresent(GLFW_JOYSTICK_1);
 
 }
+
+void OpenGLRenderer::initImGui_()
+{
+    if (!ImGui_ImplGlfwGL3_Init(window, true))
+        throw std::runtime_error("Unable to init ImGui");
+    ImGuiIO& io = ImGui::GetIO();
+    io.Fonts->AddFontDefault();
+}
+
 void OpenGLRenderer::constructStaticVBO_() {
     // Construct VBO for rendering, in this stage
     // assumes that all of the data contains only 
@@ -41,7 +50,7 @@ void OpenGLRenderer::constructStaticVBO_() {
     std::vector<float> buffer; //!< X,Y,Z,W,Nx,Ny,Nz
     std::vector<GLuint> index; // Face indices for the who objects
     GLuint indexOffset = 0;
-    for (const auto &obj : world_.getStaticObjs())
+    for (auto &obj : world_.staticObjs())
     {
         glm::mat4 modelMatrix(obj.modelMatrix());
         glm::mat4 normalMat = glm::inverse(glm::transpose(modelMatrix));

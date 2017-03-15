@@ -132,7 +132,7 @@ void loadSimpleOBJ(std::string objFile, std::vector<float> &buf, std::vector<uns
 int main()
 {
     LOG::restartLog();
-    GAME::World world(100, 100, Rectangle{glm::vec2(-1.0), glm::vec2(1.0)});
+    GAME::World world(100, 100, Rectangle{glm::vec2(-5.0), glm::vec2(5.0)});
     GAME::Object obj1;
     GAME::Object obj2;
 
@@ -153,8 +153,8 @@ int main()
     loadSimpleOBJ(inputFile, buf2, index2);
     obj2.data() = buf2;
     obj2.index() = index2;
-    obj2.modelMatrix() = glm::translate(obj2.modelMatrix(), glm::vec3(-2.0, 0.0, 0.0));
-    obj2.modelMatrix() = glm::scale(obj2.modelMatrix(), glm::vec3(10.0));
+    obj2.modelMatrix() = glm::translate(obj2.modelMatrix(), glm::vec3(-4.0, 0.0, 0.0));
+    //obj2.modelMatrix() = glm::scale(obj2.modelMatrix(), glm::vec3(10.0));
     world.addStaticObj(obj2);
 
     GAME::OpenGLRenderer renderer(world);

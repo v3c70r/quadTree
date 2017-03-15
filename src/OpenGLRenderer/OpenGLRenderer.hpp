@@ -5,6 +5,7 @@
 #include <common/log.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/string_cast.hpp>
+#include <examples/opengl3_example/imgui_impl_glfw_gl3.h>
 
 namespace GAME
 {
@@ -25,6 +26,7 @@ private:
 
     void constructStaticVBO_(); //!< Construct VBO for static objects
     void initGL_();             //!< Init OpenGL context
+    void initImGui_();           //!< Initialize OpenGL 
     // GLFW callbacks
     static void error_callback(int error, const char* description)
     {
@@ -64,23 +66,19 @@ private:
         int axisCount = 0;
         const float *axis = ::glfwGetJoystickAxes(joystick, &axisCount);
         int btnCount = 0;
-        //const char* name = glfwGetJoystickName(joystick);
-        //std::cout<<"Joystick name: "<<name<<std::endl;
         const unsigned char *btns = ::glfwGetJoystickButtons(joystick, &btnCount);
-        //std::cout<<"================\n";
-        //for (int i = 0; i < axisCount; i++)
-        //    if (std::abs(axis[i] - 0.0) > 0.1)
-        //        std::cout<<"axis "<<i<<": "<<axis[i]<<std::endl;
-        //for (int i = 0; i < btnCount; i++)
-        //    if (btns[i])
-        //        std::cout<<"btn "<<i<<": "<<btns[i]<<std::endl;
-        world_.camera().pitch(axis[5]/50.0);
-        world_.camera().yaw(axis[2]/50.0);
-        world_.camera().forward(-axis[1]/10.0);
-        world_.camera().strafe(axis[0]/10.0);
-
-
-
+#if __APPLE__
+        world_.camera().pitch(axis[3] / 50.0);
+        world_.camera().yaw(axis[2] / 50.0);
+        world_.camera().forward(-axis[1] / 10.0);
+        world_.camera().strafe(axis[0] / 10.0);
+        ImGui::Text("Axis %f, %f, %f, %f\n", axis[3], axis[2], axis[1], axis[0]);
+#else
+        world_.camera().pitch(axis[5] / 50.0);
+        world_.camera().yaw(axis[2] / 50.0);
+        world_.camera().forward(-axis[1] / 10.0);
+        world_.camera().strafe(axis[0] / 10.0);
+#endif
     }
 
 public:
@@ -88,6 +86,7 @@ public:
     void init() 
     {
         initGL_();
+        initImGui_();
         constructStaticVBO_();
         shader_.createProgrammeFromFiles("shaders/shader.vs", "shaders/shader.fs");
         shader_.getUniforms();
@@ -95,6 +94,13 @@ public:
     }
     void glDraw()
     {
+        // Draw ImGui
+        static float scale = 100.0;
+        ImGui::SliderFloat("Scale", &scale, 0.1, 1000.0, "%.0f");
+        world_.quadTree().ImDraw(scale, world_.quadTree().getBound());
+        for (const auto &obj: world_.staticObjs())
+            obj.getBoundingBox().ImDraw(scale, world_.quadTree().getBound());
+
         glBindVertexArray(staticObjVAO);
         shader_.use();
         // TODO: Use UBO
@@ -113,8 +119,13 @@ public:
     void runLoop()
     {
         while (!glfwWindowShouldClose(window)) {
+            ImGui_ImplGlfwGL3_NewFrame();
+            ImGui::Text("Hello, world!");
             if (::glfwJoystickPresent(GLFW_JOYSTICK_2))
-                    handleJoystick(GLFW_JOYSTICK_2);
+                handleJoystick(GLFW_JOYSTICK_2);
+            else if (::glfwJoystickPresent(GLFW_JOYSTICK_1))
+                handleJoystick(GLFW_JOYSTICK_1);
+
             world_.camera().update();
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glEnable(GL_BLEND);
@@ -125,12 +136,14 @@ public:
 
             glDraw();
 
+            ImGui::Render();
             glfwSwapBuffers(window);
             glfwPollEvents();
         }
     }
     ~OpenGLRenderer()
     {
+        ImGui_ImplGlfwGL3_Shutdown();
         glDeleteBuffers(1, &staticObjVBO);
         glDeleteBuffers(1, &staticObjIBO);
         glDeleteVertexArrays(1, &staticObjVAO);

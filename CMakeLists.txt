@@ -1,13 +1,15 @@
 cmake_minimum_required(VERSION 2.8)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-set(CMAKE_CXX_FLAGS "-std=c++14 -g")
+set(CMAKE_CXX_FLAGS "-std=c++14 ")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -g")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3")
 
 find_package(GLEW REQUIRED)
 find_package(GLFW REQUIRED)
 find_package(OpenGL REQUIRED)
-set(TINYOBJ_INCLUDE_DIR "/home/tsing/project/common/include")
-set(TINYOBJ_LIB "/home/tsing/project/common/lib/libtinyobjloader.a")
-include_directories(${TINYOBJ_INCLUDE_DIR})
+#set(TINYOBJ_INCLUDE_DIR "/home/tsing/project/common/include")
+#set(TINYOBJ_LIB "/home/tsing/project/common/lib/libtinyobjloader.a")
+#include_directories(${TINYOBJ_INCLUDE_DIR})
 
 option(ENABLE_TEST off)
 
@@ -56,7 +58,7 @@ target_link_libraries(
     ${CMAKE_DL_LIBS}
     OpenGLRenderer
     common
-    ${TINYOBJ_LIB}
+    #${TINYOBJ_LIB}
     )
 file(
     COPY

@@ -9,6 +9,12 @@ struct Rectangle
     std::array<glm::vec2, 2> bounds;    //!< bound: p[0] is bottom left, p[1] is top right
     bool overlaps(const Rectangle &r);
 
+    //! Helper functions
+    float& minX() { return bounds[0].x;}
+    float& minY() { return bounds[0].y;}
+    float& maxX() { return bounds[1].x;}
+    float& maxY() { return bounds[1].y;}
+
     //! Test if point in the rectangle
     bool contains(const glm::vec2 &p)
     {
