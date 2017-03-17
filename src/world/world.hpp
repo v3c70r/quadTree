@@ -22,7 +22,7 @@ protected:
     const size_t MAX_NUM_DYNAMIC_OBJS;  //!< Maximum number of dynamic objects
     std::vector<Object> staticObjs_;    //!< Static objects
     std::vector<Actor> actors_;         //!< Dynamic objects
-    QT::AABBQuad<10, 100> quadTree_;
+    QT::AABBQuad<5, 2> quadTree_;
     FPScamera camera_;
 
 public:
@@ -45,27 +45,32 @@ public:
     /* Add a static object into world, also insert
      * its bounding box to quadTree
      */
+    bool first=true;
     void addStaticObj(Object obj)
     {
-        Rectangle boundingBox{glm::vec2(
-            std::numeric_limits<float>::max(),
-            std::numeric_limits<float>::min())};  // Boundingbox for this object
+        Rectangle boundingBox{
+            glm::vec2(std::numeric_limits<float>::max()),
+            glm::vec2(-std::numeric_limits<float>::max())
+        };  // Boundingbox for
+                                                            // this object
         glm::mat4 modelMatrix(obj.modelMatrix());
         for (size_t i = 0; i < obj.data().size(); i += 6) {
             glm::vec4 pos(obj.data()[i], obj.data()[i + 1], obj.data()[i + 2],
                           1.0);
             pos = modelMatrix * pos;
-            // Update bounding box
             if (pos.x < boundingBox.minX()) boundingBox.minX() = pos.x;
             if (pos.x > boundingBox.maxX()) boundingBox.maxX() = pos.x;
 
             if (pos.z < boundingBox.minY()) boundingBox.minY() = pos.z;
             if (pos.z > boundingBox.maxY()) boundingBox.maxY() = pos.z;
+
         }
+
         std::cout<<boundingBox.minX()<<"\t"<<boundingBox.minY()<<std::endl;
         std::cout<<boundingBox.maxX()<<"\t"<<boundingBox.maxY()<<std::endl;
         assert(boundingBox.minX() < boundingBox.maxX());
         assert(boundingBox.minY() < boundingBox.maxY());
+
         obj.setBoundingBox(boundingBox);
         quadTree_.insertObj(&obj);
         staticObjs_.push_back(obj);
@@ -73,6 +78,6 @@ public:
     const std::vector<Object>& staticObjs() const { return staticObjs_; }
     std::vector<Object>& staticObjs() { return staticObjs_; }
     void update(std::chrono::milliseconds dt);
-    const QT::AABBQuad<10, 100>& quadTree() const { return quadTree_; }
+    const QT::AABBQuad<5, 2>& quadTree() const { return quadTree_; }
 };
 }

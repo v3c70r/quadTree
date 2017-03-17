@@ -142,20 +142,32 @@ int main()
     std::vector<unsigned> index1;
     loadSimpleOBJ(inputFile, buf1, index1);
 
-    obj1.data() = buf1;
-    obj1.index() = index1;
-    obj1.modelMatrix() = glm::rotate(obj1.modelMatrix(), 3.1415926f, glm::vec3(0.0, 1.0, 0.0));
-    world.addStaticObj(obj1);
+    //obj1.data() = buf1;
+    //obj1.index() = index1;
+    //obj1.modelMatrix() = glm::rotate(obj1.modelMatrix(), 3.1415926f, glm::vec3(0.0, 1.0, 0.0));
+    //world.addStaticObj(obj1);
 
     inputFile = "model/bunny.obj";
     std::vector<float> buf2;
     std::vector<unsigned> index2;
     loadSimpleOBJ(inputFile, buf2, index2);
-    obj2.data() = buf2;
-    obj2.index() = index2;
-    obj2.modelMatrix() = glm::translate(obj2.modelMatrix(), glm::vec3(-4.0, 0.0, 0.0));
+    //obj2.data() = buf2;
+    //obj2.index() = index2;
+    //obj2.modelMatrix() = glm::translate(obj2.modelMatrix(), glm::vec3(-3.0, 0.0, 0.0));
     //obj2.modelMatrix() = glm::scale(obj2.modelMatrix(), glm::vec3(10.0));
-    world.addStaticObj(obj2);
+    //world.addStaticObj(obj2);
+    //obj2.modelMatrix() = glm::translate(obj2.modelMatrix(), glm::vec3(6.0, 0.0, 0.0));
+    //world.addStaticObj(obj2);
+
+    for (int i=0; i<3; i++)
+    {
+        GAME::Object obj;
+        obj.data() = buf2;
+        obj.index() = index2;
+        obj.modelMatrix() = glm::translate(obj.modelMatrix(), glm::vec3(-2.0 * i + 2.0, 0.0, 0.0));
+        obj.modelMatrix() = glm::scale(obj.modelMatrix(), glm::vec3(10.0));
+        world.addStaticObj(obj);
+    }
 
     GAME::OpenGLRenderer renderer(world);
     renderer.init();
